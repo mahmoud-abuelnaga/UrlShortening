@@ -7,59 +7,16 @@ import { StatusCodes } from "http-status-codes";
 const BASE62_ENCODING =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-// helper functions
-/**
- * Creates a hash from a string
- *
- * @param {String} str - The string to hash
- * @returns {Number}
- */
-function createHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const charCode = str.charCodeAt(i);
-        hash = (hash << 5) - hash + charCode;
-        hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash);
-}
-
-/**
- * Takes a number and convert it to base62 encoding
- *
- * @param {Number} number - Number to conver to short code
- * @returns {String}
- */
-function createShortCode(number) {
-    let shortCode = "";
-    while (number > 0) {
-        let rem = number % 62;
-        number = Math.floor(number / 62);
-        shortCode = BASE62_ENCODING[rem] + shortCode;
-    }
-
-    return shortCode;
-}
-
-/**
- * Replaces http of the protocol with https and vice versa
- *
- * @param {String} url  - The url to replace its protocol
- * @returns {String}
- */
-function replacehttp(url) {
-    if (url.includes("https")) {
-        return url.replace("https", "http");
-    } else if (url.includes("http")) {
-        return url.replace("http", "https");
-    }
-
-    return url;
-}
-
 // controllers
+/**
+ * Creates a short code for the url in the request body and responds with a JSON response with the original url and the short code
+ *
+ * @param {express.Request} req - Express Request Object
+ * @param {express.Response} res - Express Response Object
+ * @param {express.NextFunction} next - Express NextFunction
+ */
 async function createShortUrl(req, res, next) {
-    if (req.errors) {
+    if (req.errors.length > 0) {
         return res.status(StatusCodes.BAD_REQUEST).json({
             message: "Invalid Request",
             errors: req.errors,
@@ -108,13 +65,13 @@ async function createShortUrl(req, res, next) {
     });
 }
 
-/*
-Returns a JSON response with the original url that correponds to the short one
-
-@param {express.Request} req - Express Request Object
-@param {express.Response} res - Express Response Object
-@param {express.NextFunction} - Express NextFunction
-*/
+/**
+ * Responds with a JSON that carries the the original url that corresponds to the short one
+ *
+ * @param {express.Request} req - Express Request Object
+ * @param {express.Response} res - Express Response Object
+ * @param {express.NextFunction} next - Express NextFunction
+ */
 function getOriginalUrl(req, res, next) {}
 
 function updateUrl(req, res, next) {}
@@ -124,3 +81,53 @@ function deleteUrl(req, res, next) {}
 function getUrlStats(req, res, next) {}
 
 export { createShortUrl, getOriginalUrl, updateUrl, deleteUrl, getUrlStats };
+
+// <------------------ Helper Functions ------------------>
+/**
+ * Creates a hash from a string
+ *
+ * @param {String} str - The string to hash
+ * @returns {Number}
+ */
+function createHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const charCode = str.charCodeAt(i);
+        hash = (hash << 5) - hash + charCode;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+}
+
+/**
+ * Takes a number and convert it to base62 encoding
+ *
+ * @param {Number} number - Number to conver to short code
+ * @returns {String}
+ */
+function createShortCode(number) {
+    let shortCode = "";
+    while (number > 0) {
+        let rem = number % 62;
+        number = Math.floor(number / 62);
+        shortCode = BASE62_ENCODING[rem] + shortCode;
+    }
+
+    return shortCode;
+}
+
+/**
+ * Replaces http of the protocol with https and vice versa
+ *
+ * @param {String} url  - The url to replace its protocol
+ * @returns {String}
+ */
+function replacehttp(url) {
+    if (url.includes("https")) {
+        return url.replace("https", "http");
+    } else if (url.includes("http")) {
+        return url.replace("http", "https");
+    }
+
+    return url;
+}
